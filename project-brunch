@@ -1,0 +1,48 @@
+from bs4 import BeautifulSoup
+from urllib import urlopen
+from lxml import html
+import requests
+
+queries = 0
+listgood = [
+    'egg-shop-new-york',
+    'jane-new-york-2',
+    'bluestone-lane-new-york-3',
+    'cliton-street-baking-company-new-york-4',
+    'jacks-wife-freda-new-york',
+    'little-collins-new-york',
+    'rustic-table-new-york',
+    'tanner-smiths-new-york-2',
+    'buvette-new-york',
+    'blank-slate-coffee-kitchen-new-york'
+]
+while queries < 101:
+    stringQ = str(queries)
+    for link in listgood:
+        pagelink = 'http://www.yelp.com/biz/'+link+'?start='+stringQ
+        page = urlopen(pagelink)
+        soup = BeautifulSoup(page,'html.parser')
+        reviews = soup.findAll('p', attrs={'itemprop':'description'})
+
+        flag = True
+        indexOf = 1
+        for review in reviews:
+            dirtyEntry = str(review)
+            while dirtyEntry.index('<') != -1:
+                indexOf = dirtyEntry.index('<')
+                endOf = dirtyEntry.index('>')
+                if flag:
+                    dirtyEntry = dirtyEntry[endOf+1:]
+                    flag = False
+                else:
+                    if(endOf+1 == len(dirtyEntry)):
+                        cleanEntry = dirtyEntry[0:indexOf]
+                        break
+                    else:
+                        dirtyEntry = dirtyEntry[0:indexOf]+dirtyEntry[endOf+1:]
+
+            f=open("goodreviews.txt", "a+")
+            f.write(cleanEntry)
+            f.close
+
+    queries = queries + 20
